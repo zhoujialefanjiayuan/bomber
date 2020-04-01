@@ -1,0 +1,10 @@
+version: '2.4'
+services:
+  bomber-job:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: ../../aws.env
+    environment: 
+      AWS_SQS_QUEUE_URL: https://sqs.ap-southeast-1.amazonaws.com/238040126021/ikidana_bomber
+

@@ -1,0 +1,95 @@
+#以下时间均为utc时区，时间相差8小时
+#凌晨2点15 计算逾期天数小于95天的件的逾期天数
+15 18 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_CALC_OVERDUE_DAYS"}'
+
+#凌晨,，汇总计算每个催收员的工作指标
+15 16 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_CALC_SUMMARY2"}'
+
+#凌晨3点 更新下P的件，转人工维护，或者unclaim
+20 19 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_CLEAR_OVERDUE_PTP"}'
+
+# 8  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 4, "custom_type": "new", "msg_type": "T4_NEW"}}'
+# 8  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 4, "custom_type": "old", "msg_type": "T4_OLD"}}'
+# 9  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 6, "custom_type": "new", "msg_type": "T6_NEW"}}'
+# 9  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 6, "custom_type": "old", "msg_type": "T6_OLD"}}'
+# 10  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 8, "custom_type": "new", "msg_type": "T8_NEW"}}'
+# 10  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 8, "custom_type": "old", "msg_type": "T8_OLD"}}'
+# 11  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 10, "custom_type": "new", "msg_type": "T10_NEW"}}'
+# 11  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 10, "custom_type": "old", "msg_type": "T10_OLD"}}'
+# 12  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 14, "custom_type": "new", "msg_type": "T14_NEW"}}'
+# 12  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 14, "custom_type": "old", "msg_type": "T14_OLD"}}'
+# 13  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 17, "custom_type": "all", "msg_type": "T17_ALL"}}'
+# 13  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 21, "custom_type": "all", "msg_type": "T21_ALL"}}'
+# 14  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 25, "custom_type": "all", "msg_type": "T25_ALL"}}'
+# 14  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_SMS", "payload": {"day_diff": 29, "custom_type": "all", "msg_type": "T29_ALL"}}'
+#提醒用户即将到达承诺还款时间
+15  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_REMIND_PROMISE", "payload": {"day_diff": -1, "msg_type": "REMIND_PROMISE_BEFORE"}}'
+15  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_REMIND_PROMISE", "payload": {"day_diff": -2, "msg_type": "REMIND_PROMISE_BEFORE"}}'
+16  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_REMIND_PROMISE", "payload": {"day_diff": -3, "msg_type": "REMIND_PROMISE_BEFORE"}}'
+16  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_REMIND_PROMISE", "payload": {"day_diff": -5, "msg_type": "REMIND_PROMISE_BEFORE"}}'
+17  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_REMIND_PROMISE", "payload": {"day_diff": -10, "msg_type": "REMIND_PROMISE_BEFORE"}}'
+17  1 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_REMIND_PROMISE", "payload": {"day_diff": 1, "msg_type": "REMIND_PROMISE_AFTER"}}'
+#凌晨四点，生成自动外呼数据，分件
+0  20 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_CALL_LIST"}'
+#11点自动发送短信，当天自动外呼成功的电话记录
+15  3 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_MESSAGE_DAILY"}'
+
+# 每30分钟执行清道夫,刷新auto_call_list.status  状态
+*/30 * * * *   root /bin/sqs_send.sh '{"action": "BOMBER_SCAVENGER"}'
+*/30 * * * *   root /bin/sqs_send.sh '{"action": "MESSAGE_EXECUTE_SEND_HOUR"}'
+
+# 22点，AUTO_CALL_LIST  当天数据备份
+0  13 * * *   root /bin/sqs_send.sh '{"action": "BOMBER_AUTO_CALL_LIST_RECORD"}'
+
+# 22点，生成当天催收报告，report
+15 13 * * *   root /bin/sqs_send.sh '{"action": "REPORT_BOMBER_COLLECTION"}'
+
+# ivr，凌晨3点，获取近期4天内即将逾期的件
+0  19 * * *    root /bin/sqs_send.sh '{"action": "GET_IVR"}'
+
+# 每周日凌晨4点执行，报表recover_rate待催维度，每个cycle的报表
+0  20 * * 0    root /bin/sqs_send.sh '{"action": "RECOVER_RATE_WEEK_MONEY"}'
+# 报表recover_rate入催维度
+30  19 * * *    root /bin/sqs_send.sh '{"action": "RECOVER_RATE_WEEK_MONEY_INTO"}'
+# summary数据创建
+10  13 * * *    root /bin/sqs_send.sh '{"action": "SUMMARY_CREATE"}'
+# summary報表
+30  16 * * *    root /bin/sqs_send.sh '{"action": "SUMMARY_NEW"}'
+# summary数据
+40  16 * * *    root /bin/sqs_send.sh '{"action": "UPDATE_SUMMARY_NEW"}'
+# summary数据cycle层
+50  16 * * *    root /bin/sqs_send.sh '{"action": "SUMMARY_NEW_CYCLE"}'
+
+# 更新逾期天数大于95天的件的预期天数
+50  20 * * *    root /bin/sqs_send.sh '{"action": "BOMBER_CALC_OVERDUE_DAYS_OVER"}'
+
+#  每天查看是否有人员变动，进行分件，installment为0，c1b,c2,c3的人员变动
+45  12 * * *    root /bin/sqs_send.sh '{"action": "BOMBER_CHANGE_DISPATCH_APPS"}'
+
+#  每天上午统计员工日报数据
+41  4 * * *    root /bin/sqs_send.sh '{"action": "SUMMARY_DAILY"}'
+#  每天下午统计员工日报数据
+21  9 * * *    root /bin/sqs_send.sh '{"action": "SUMMARY_DAILY"}'
+#  每天凌晨统计员工昨天日报数据
+01  16 * * *    root /bin/sqs_send.sh '{"action": "SUMMARY_DAILY"}'
+
+#  每月1号对上个月的件进行重新分配,定时任务放在统计之前
+30  17 28,29,30,31 * *    root /bin/sqs_send.sh '{"action": "MONTH_DISPATCH_APP"}'
+
+# 每天定时记录催收单信息
+0  22 * * *    root /bin/sqs_send.sh '{"action": "SUMMARY_BOMBER_OVERDUE"}'
+# 逾期催收短信
+45  3 * * *    root /bin/sqs_send.sh '{"action": "BOMBER_INSTALMENT_AUTO_MESSAGE_DAILY"}'
+
+# 每分钟统计员工手中的下p件个数
+*/1  0-13 * * *    root /bin/sqs_send.sh '{"action": "BOMBER_PTP_REAL_TIME_SUMMARY"}'
+
+# 11:00,15:00,18:30 更新员工自动外呼的状态，若催收员手中有未处理的下p件，则不接受自动外呼
+0  3,7 * * *    root /bin/sqs_send.sh '{"action": "BOMBER_TODAY_PTP_FOLLOW_SWITCH_OFF"}'
+30  10 * * *    root /bin/sqs_send.sh '{"action": "BOMBER_TODAY_PTP_FOLLOW_SWITCH_OFF"}'
+
+
+# 每天8点更打开员工自动外呼外呼状态
+0  0 * * *    root /bin/sqs_send.sh '{"action": "BOMBER_TODAY_PTP_FOLLOW_SWITCH_ON"}'
+
+

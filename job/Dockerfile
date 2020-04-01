@@ -1,0 +1,1 @@
+FROM likang/docker-cron-awscli

@@ -1,0 +1,30 @@
+version: '2.4'
+services:
+  http:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file: ../aws.env
+    ports: 
+      - "1129:1129"
+    command: gunicorn -b 0.0.0.0:1129 -k gthread --workers 1 --threads 8 run
+    scale: 1
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile-worker
+    restart: always
+    env_file: ../aws.env 
+    command: python /app/run_worker.py
+    scale: 1
+
+  bomber-job:
+    build:
+      context: ./job
+      dockerfile: Dockerfile
+    env_file: ../../aws.env
+    restart: always
+    environment:
+      AWS_SQS_QUEUE_URL: https://sqs.ap-southeast-1.amazonaws.com/238040126021/ikidana_bomber

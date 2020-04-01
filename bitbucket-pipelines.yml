@@ -1,0 +1,22 @@
+image: python:3.5
+
+pipelines:
+  default:
+    - step:
+        script:
+          - pip install -r requirements.txt -r requirements-test.txt
+          - pytest tests --maxfail=1 -q
+          - pytest --pep8 --maxfail=1 -q
+          - pytest --flakes --maxfail=1 -q
+          - pytest --cov=bomber --maxfail=1 -q
+        services:
+          - mysql
+
+definitions:
+  services:
+    mysql:
+      image: mysql:5.7
+      environment:
+        MYSQL_DATABASE: 'test_bomber'
+        MYSQL_ROOT_PASSWORD: 'bb_pwd'
+
