@@ -2,7 +2,7 @@ pandas==0.23.3
 gevent==1.2.2
 gunicorn==19.7.1
 bottle==0.12.13
-marshmallow==2.13.6
+marshmallow==2.15.1
 peewee==2.10.1
 voluptuous==0.10.5
 boto3==1.4.7
